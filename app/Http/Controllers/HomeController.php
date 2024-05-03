@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Markaz;
+use App\Models\Tulov;
 use App\Models\Sms;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -26,7 +27,8 @@ class HomeController extends Controller{
         $sms = $response['sms'];
         $active = $response['active'];
         $SmsHistory = Sms::where('markaz_id',$id)->get();
-        return view('show',compact('Markaz','setting','sms','active','SmsHistory'));
+        $Tulov = Tulov::where('markaz_id',$id)->get();
+        return view('show',compact('Markaz','setting','sms','active','SmsHistory','Tulov'));
     }
     public function createSms(Request $request){
         $Markaz = Markaz::find($request->id);
@@ -44,6 +46,15 @@ class HomeController extends Controller{
         }else{
             dd('error');
         }
+    }
+    public function tulov(Request $request){
+        $validated = $request->validate([
+            'summa' => 'required',
+            'about' => 'required'
+        ]);
+        $validated['markaz_id'] = $request->id;
+        Tulov::create($validated);
+        return redirect()->back();
     }
     public function settings(Request $request){
         $Markaz = Markaz::find($request->id);

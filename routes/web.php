@@ -8,6 +8,7 @@ Auth::routes();
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/show/{id}', [HomeController::class, 'show'])->name('show');
 Route::post('/create', [HomeController::class, 'create'])->name('create');
+Route::post('/tulov', [HomeController::class, 'tulov'])->name('tulov');
 Route::post('/create/sms', [HomeController::class, 'createSms'])->name('createSms');
 Route::post('/update/settings', [HomeController::class, 'settings'])->name('settings');
 Route::get('/update/{id}', [HomeController::class, 'update'])->name('update');

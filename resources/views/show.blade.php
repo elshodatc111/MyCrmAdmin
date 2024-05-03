@@ -48,11 +48,11 @@
             <div class="card mb-3">
                 <div class="card-header text-center">To'lov</div>
                 <div class="card-body">
-                    <form action="" method="post">
+                    <form action="{{ route('tulov') }}" method="post">
                         @csrf
                         <input type="hidden" name="id" value="{{ $Markaz['id'] }}">
-                        <input type="number" name="plus" class="form-control" placeholder="Summa" required>
-                        <input type="test" name="plus" class="form-control mt-2" placeholder="To'lov haqida" required>
+                        <input type="number" name="summa" class="form-control" placeholder="Summa" required>
+                        <input type="test" name="about" class="form-control mt-2" placeholder="To'lov haqida" required>
                         <button type="submit" class="btn btn-primary mt-2 mb-2 w-100">Saqlash</button>
                     </form>
                 </div>
@@ -154,10 +154,11 @@
                         <th>To'lov haqida</th>
                         <th>To'lov vaqti</th>
                     </tr>
-                    @foreach($SmsHistory as $item)
+                    @foreach($Tulov as $item)
                     <tr>
                         <td>{{ $loop->index+1 }}</td>
-                        <td>{{ $item->count }}</td>
+                        <td>{{ $item->summa }}</td>
+                        <td>{{ $item->about }}</td>
                         <td>{{ $item->created_at }}</td>
                     </tr>
                     @endforeach
