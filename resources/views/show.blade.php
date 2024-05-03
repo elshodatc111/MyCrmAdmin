@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-12">
+        <div class="col-md-6">
             <div class="card mb-3">
                 <div class="card-header text-center">{{ $Markaz['markaz'] }}</div>
                 <div class="card-body">
@@ -27,6 +27,34 @@
                             <td style="text-align:right;">{{ $setting['Status'] }}</td>
                         </tr>
                     </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card mb-3">
+                <div class="card-header text-center">Sozlamalar</div>
+                <div class="card-body">
+                    <form action="{{ route('settings') }}" method="post">
+                        @csrf
+                        <input type="hidden" name="id" value="{{ $Markaz['id'] }}">
+                        <input type="date" name="EndData" class="form-control" placeholder="Ogohlantirish" required>
+                        <input type="test" name="Status" class="form-control mt-2" placeholder="true / false" required>
+                        <button type="submit" class="btn btn-primary mt-2 mb-2 w-100">Saqlash</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card mb-3">
+                <div class="card-header text-center">To'lov</div>
+                <div class="card-body">
+                    <form action="" method="post">
+                        @csrf
+                        <input type="hidden" name="id" value="{{ $Markaz['id'] }}">
+                        <input type="number" name="plus" class="form-control" placeholder="Summa" required>
+                        <input type="test" name="plus" class="form-control mt-2" placeholder="To'lov haqida" required>
+                        <button type="submit" class="btn btn-primary mt-2 mb-2 w-100">Saqlash</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -85,10 +113,55 @@
                             <td>{{ $sms['maxsms'] }}</td>
                         </tr>
                     </table>
-                    <form action="" method="post">
-                        <input type="number" class="form-control" placeholder="SMS soni" required>
-                        <button class="btn btn-primary mt-1 w-100">Saqlash</button>
+                    <form action="{{ route('createSms') }}" method="post">
+                        @csrf
+                        <input type="hidden" name="id" value="{{ $Markaz['id'] }}">
+                        <input type="number" name="plus" class="form-control" placeholder="SMS soni" required>
+                        <button type="submit" class="btn btn-primary mt-1 w-100">Saqlash</button>
                     </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header text-center">SMSlar kiritildi</div>
+                <div class="card-body">
+                <table class="table table-bordered text-center">
+                    <tr>
+                        <th>#</th>
+                        <th>SMS soni</th>
+                        <th>Qoshilgan vaqt</th>
+                    </tr>
+                    @foreach($SmsHistory as $item)
+                    <tr>
+                        <td>{{ $loop->index+1 }}</td>
+                        <td>{{ $item->count }}</td>
+                        <td>{{ $item->created_at }}</td>
+                    </tr>
+                    @endforeach
+                </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header text-center">To'lovlar</div>
+                <div class="card-body">
+                <table class="table table-bordered text-center">
+                    <tr>
+                        <th>#</th>
+                        <th>To'lov summasi</th>
+                        <th>To'lov haqida</th>
+                        <th>To'lov vaqti</th>
+                    </tr>
+                    @foreach($SmsHistory as $item)
+                    <tr>
+                        <td>{{ $loop->index+1 }}</td>
+                        <td>{{ $item->count }}</td>
+                        <td>{{ $item->created_at }}</td>
+                    </tr>
+                    @endforeach
+                </table>
                 </div>
             </div>
         </div>

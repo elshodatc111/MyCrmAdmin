@@ -1,120 +1,94 @@
 <?php
 
-namespace App\Http\Controllers\Api;
-use App\Models\Setting;
-use App\Models\SmsCounter;
-use App\Models\Guruh;
-use App\Models\GuruhUser;
-use App\Http\Controllers\Controller;
+namespace App\Http\Controllers;
+use App\Models\Markaz;
+use App\Models\Sms;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
-class ApiController extends Controller{
-
-    public function activuser(){
-        $t = 0;
-        $return = array();
-        for($a=-11;$a<1;$a++){
-            $StartDates = date("Y-m",strtotime($a.' month',time()))."-01 00:00:00";
-            $EndDates = date("Y-m",strtotime($a.' month',time()))."-31 23:59:59";
-            $Guruhsss = Guruh::where('guruh_start','<=',$EndDates)->where('guruh_end','>=',$StartDates)->get();
-            $ActivUser = array();
-            foreach ($Guruhsss as $key => $value) {
-                $GuruhUsersss = GuruhUser::where('guruh_id',$value->id)->get();
-                foreach ($GuruhUsersss as $key11 => $item) {
-                    $userss_id = $item->user_id;
-                    $km = 0;
-                    foreach ($ActivUser as $keyaaaas => $valueaaaas) {
-                        if($valueaaaas==$userss_id){
-                            $km++;
-                        }
-                    }
-                    if($km==0){
-                        array_push($ActivUser, $userss_id);
-                    }   
-                }
-            }
-            $ActivStudent = count($ActivUser);
-            $t = $t+1;
-            $return[$t]['count'] = $ActivStudent;
-            $return[$t]['data'] = date("Y-M",strtotime($a.' month',time()));
-        }
-        return $return;
+class HomeController extends Controller{
+    public function __construct(){
+        $this->middleware('auth');
     }
-    public function setting(Request $request){
-        $Username = $request->login;
-        $Password = $request->parol;
-        if($Username=='elshodatc1116' AND $Password=='Elshod1997/*'){
-            $response = [
-                'setting' => [
-                    'EndData' => Setting::first()->EndData,
-                    'Username' => Setting::first()->Username,
-                    'Status' => Setting::first()->Status,
-                    'Summa' => Setting::first()->Summa,
-                    'created_at' => Setting::first()->created_at,
-                    'updated_at' => Setting::first()->updated_at,
-                    'message' => 'Sozlamalar'
-                ],
-                'sms' => [
-                    'maxsms' => SmsCounter::first()->maxsms,
-                    'counte' => SmsCounter::first()->counte
-                ],
-                'active' => $this->activuser()
-            ];
+
+    public function index(){
+        $Markaz = Markaz::get();
+        return view('home',compact('Markaz'));
+    }
+
+    public function show($id){
+        $Markaz = Markaz::find($id);
+        $response = Http::get($Markaz['link'].'/api/setting', [
+            'login' => 'elshodatc1116',
+            'parol' => 'Elshod1997/*',
+        ])->json();
+        $setting = $response['setting'];
+        $sms = $response['sms'];
+        $active = $response['active'];
+        $SmsHistory = Sms::where('markaz_id',$id)->get();
+        return view('show',compact('Markaz','setting','sms','active','SmsHistory'));
+    }
+    public function createSms(Request $request){
+        $Markaz = Markaz::find($request->id);
+        $response = Http::post($Markaz['link'].'/api/sms/plus', [
+            'maxsms' => $request->plus,
+            'login' => 'elshodatc1116',
+            'parol' => 'Elshod1997/*',
+        ]);
+        if($response->status()==200){
+            $Sms = new Sms;
+            $Sms->markaz_id = $request->id;
+            $Sms->count = $request->plus;
+            $Sms->save();
+            return redirect()->back();
         }else{
-            $response = [
-                'error' => 'xatolik'
-            ];
+            dd('error');
         }
-        return $response;
     }
-
-    public function update(Request $request){
-        $Login = $request->login;
-        $parol = $request->parol;
-        
-        if($Login=='elshodatc1116' AND $parol=='Elshod1997/*'){
-            $Setting = Setting::first();
-            $Setting->EndData = $request->EndData;
-            $Setting->Username = $request->Username;
-            $Setting->Status = $request->Status;
-            $Setting->save();
-            $response = [
-                'status' => [
-                    'code' => 200,
-                    'message' => "Filial Sozlamalari sozlandi"
-                ]
-            ];
+    public function settings(Request $request){
+        $Markaz = Markaz::find($request->id);
+        $response = Http::post($Markaz['link'].'/api/setting/update', [
+            'EndData' => $request->EndData,
+            'Status' => $request->Status,
+            'Username' => 'elshodatc1116',
+            'login' => 'elshodatc1116',
+            'parol' => 'Elshod1997/*',
+        ]);
+        if($response->status()==200){
+            return redirect()->back();
         }else{
-            $response = [
-                'error' => 'xatolik'
-            ];
+            dd('error');
         }
-        return $response;
     }
 
-    public function smsCountPlus(Request $request){
-        $Login = $request->login;
-        $parol = $request->parol;
-        
-        if($Login=='elshodatc1116' AND $parol=='Elshod1997/*'){
-            $SmsCounter = SmsCounter::first();
-            $SmsCounter->maxsms = $SmsCounter->maxsms + $request->maxsms;
-            $SmsCounter->save();
-            $response = [
-                'status' => [
-                    'code' => 200,
-                    'plus' => $request->maxsms,
-                    'maxsms' => $SmsCounter->maxsms,
-                    'counte' => $SmsCounter->counte,
-                    'message' => "Filialga sms qo'shildi"
-                ]
-            ];
-        }else{
-            $response = [
-                'error' => 'xatolik'
-            ];
-        }
-        return $response;
+    public function create(Request $request){
+        $validated = $request->validate([
+            'markaz' => 'required',
+            'drektor' => 'required',
+            'phone' => 'required',
+            'link' => 'required',
+        ]);
+        Markaz::create($validated);
+        return redirect()->back();
     }
 
+    public function update (Request $request,$id){
+        $Markaz = Markaz::find($id);
+        return view('update',compact('Markaz'));
+    }
+    public function updatePost(Request $request){
+        $validated = $request->validate([
+            'markaz' => 'required',
+            'drektor' => 'required',
+            'phone' => 'required',
+            'link' => 'required',
+        ]);
+        $Markaz = Markaz::find($request->id);
+        $Markaz->drektor = $request->drektor;
+        $Markaz->phone = $request->phone;
+        $Markaz->link = $request->link;
+        $Markaz->markaz = $request->markaz;
+        $Markaz->save();
+        return redirect()->route('home');
+    }
 }
