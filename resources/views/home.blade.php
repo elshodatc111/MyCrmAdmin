@@ -24,8 +24,8 @@
                                 <td>{{ $item['phone'] }}</td>
                                 <td>{{ $item['link'] }}</td>
                                 <td>
-                                    <a href="" class="btn btn-primary px-1 py-0"><i class="bi bi-eye"></i></a>
-                                    <a href="{{ route('update',$item['id']) }}" class="btn btn-warning text-white px-1 py-0"><i class="bi bi-pen"></i></a>
+                                    <a href="{{ route('show',$item['id'] ) }}" class="btn btn-primary px-1 py-0"><i class="bi bi-eye"></i></a>
+                                    <a href="{{ route('update',$item['id'] ) }}" class="btn btn-warning text-white px-1 py-0"><i class="bi bi-pen"></i></a>
                                 </td>
                             </tr>
                         @endforeach
